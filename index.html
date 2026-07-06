@@ -409,47 +409,6 @@ function startTurn() {
   document.getElementById('hint').textContent = '';
 }
 
-function doRoll() {
-  if (phase === 'farkle') return;
-
-  const rollCount = 6 - lockedIndices.length;
-  document.getElementById('btn-roll').disabled = true;
-  document.getElementById('btn-bank').disabled = true;
-
-  // Animate
-  const newVals = Array.from({length: rollCount}, () => Math.ceil(Math.random() * 6));
-  let full = [...diceValues];
-  let newIdx = 0;
-  for (let i = 0; i < 6; i++) {
-    if (!lockedIndices.includes(i)) {
-      full[i] = newVals[newIdx++];
-    }
-  }
-  diceValues = full;
-  keptIndices = [];
-
-  renderDice(6, lockedIndices, [], true);
-  setTimeout(() => {
-    renderDice(6, lockedIndices, []);
-
-    // Check farkle on rollable dice
-    const rollable = diceValues.filter((_, i) => !lockedIndices.includes(i));
-    if (!hasAnyScore(rollable)) {
-      phase = 'farkle';
-      setStatus('FARKLE! No scoring dice. Turn over.', 'farkle');
-      turnScore = 0;
-      updateTurnScore();
-      renderDice(6, lockedIndices, []);
-      setTimeout(() => nextPlayer(), 1800);
-      return;
-    }
-
-    phase = 'pick';
-    setStatus('Tap dice to keep, then Roll or Bank.', '');
-    document.getElementById('hint').textContent = '';
-  }, 420);
-}
-
 function toggleDie(i) {
   if (phase !== 'pick') return;
   if (lockedIndices.includes(i)) return;
@@ -524,19 +483,19 @@ function rollNewDice() {
 
   renderDice(6, lockedIndices, [], true);
   setTimeout(() => {
-    renderDice(6, lockedIndices, []);
-
     const rollable = diceValues.filter((_, i) => !lockedIndices.includes(i));
     if (!hasAnyScore(rollable)) {
       phase = 'farkle';
       setStatus('FARKLE! No scoring dice. Turn over.', 'farkle');
       turnScore = 0;
       updateTurnScore();
+      renderDice(6, lockedIndices, []);
       setTimeout(() => nextPlayer(), 1800);
       return;
     }
 
     phase = 'pick';
+    renderDice(6, lockedIndices, []);
     setStatus('Tap dice to keep, then Roll or Bank.', '');
     document.getElementById('btn-roll').disabled = true;
     document.getElementById('btn-bank').disabled = true;
